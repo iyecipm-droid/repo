@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="uk"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0d0b0a">
-<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="R.E.P.O."><meta name="theme-color" content="#0d0b0a"><title>R.E.P.O. Mobile v8.6</title>
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="R.E.P.O."><meta name="theme-color" content="#0d0b0a"><title>R.E.P.O. Mobile v8.7</title>
 <link rel="manifest" href="manifest.json"><link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
 <style>
 :root{--bg:#0d0b0a;--ink:#e8dfcf;--rust:#c2562b;--sick:#d9c24a;--hp:#c93a3a;color-scheme:dark}
@@ -101,7 +101,7 @@ function mkItem(){const L=LIB[loc];if(L&&Math.random()<.65){let tot=0;for(const 
 let r=Math.random()*100,t=TY[0];for(const x of TY){if(r<x[5]){t=x;break}r-=x[5]}return{x:0,y:0,n:t[0],v:t[1],k:t[2],c:t[3],s:t[4]}}
 function bagItem(v){return{x:0,y:0,n:'Мішок грошей',v,k:'bag',c:'#d9c24a',s:v<=2000?1:v<=5000?2:3}}
 const used=()=>cart.it.reduce((a,i)=>a+(i.s||1),0),cartCap=()=>8+4*cartUp;
-function loot(p){if(Math.random()>=p)return null;return Math.random()<.025?{heal:Math.random()<.7?'mini':'big'}:mkItem()}
+function loot(p){if(Math.random()>=p)return null;if(Math.random()<.025)return{heal:Math.random()<.7?'mini':'big'};let m=mkItem();for(let i=0;i<8&&m.v>=10000;i++)m=mkItem();return m.v>=10000?null:m}
 function inZ2(o){return o.x>TR2.x&&o.x<TR2.x+TR2.w&&o.y>TR2.y&&o.y<TR2.y+TR2.h}
 function mkMask(sh){const m=[];for(let y=0;y<GH;y++)m.push(new Array(GW).fill(true));const fw=f=>Math.round(GW*f),fh=f=>Math.round(GH*f),cut=(a,b,c,d)=>{for(let y=b;y<Math.min(GH,d);y++)for(let x=a;x<Math.min(GW,c);x++)m[y][x]=false};
 if(sh=='L')cut(fw(.5),0,GW,fh(.42));else if(sh=='J')cut(0,0,fw(.42),fh(.38));else if(sh=='T'){cut(0,0,fw(.28),fh(.4));cut(fw(.72),0,GW,fh(.4))}else if(sh=='U')cut(fw(.36),0,fw(.64),fh(.45));else if(sh=='S'){cut(fw(.6),0,GW,fh(.3));cut(fw(.8),fh(.3),GW,fh(.55))}else if(sh=='tri'){cut(0,0,fw(.3),fh(.3));cut(fw(.7),0,GW,fh(.3));cut(fw(.7),fh(.7),GW,GH)}else if(sh=='C')cut(fw(.55),fh(.35),GW,fh(.65));else if(sh=='Z'){cut(0,0,fw(.4),fh(.28));cut(fw(.6),fh(.72),GW,GH)}else if(sh=='O')cut(fw(.3),fh(.3),fw(.7),fh(.62));else if(sh=='comb'){cut(fw(.22),0,fw(.4),fh(.35));cut(fw(.6),0,fw(.78),fh(.35))}
@@ -163,7 +163,7 @@ const edgeC=(r,x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>{const a=x+dx,b
 const MG={t:6,b:4,w:4,k:9,n:10,tr:17,p:2,sh:4,st:8,lb:6};
 const place=(r,t,x,y,w,h,mode,side)=>{const cs=[];for(let i=0;i<w;i++)for(let j=0;j<h;j++){const cx=x+i,cy=y+j;if(cx>=GW||cy>=GH||cx<0||cy<0||rid[cy][cx]!=r.id||blk[cy][cx]||res[cy][cx])return 0;if(mode=='in'&&edgeC(r,cx,cy))return 0;if(mode=='wall'&&!edgeC(r,cx,cy))return 0;cs.push([cx,cy])}
 cs.forEach(([cx,cy])=>blk[cy][cx]=1);nbl+=cs.length;if(!conn()){cs.forEach(([cx,cy])=>blk[cy][cx]=0);nbl-=cs.length;return 0}
-const m=MG[t],o={x:x*CS+m,y:y*CS+m,w:w*CS-2*m,h:h*CS-2*m};o.ty=t;o.side=side;if(t=='w'||t=='n'||t=='k'){o.cont=1;o.o=false;o.it=loot(t=='w'?.6:t=='k'?.5:.4)}furn.push(o);walls.push(o);return o};
+const m=MG[t],o={x:x*CS+m,y:y*CS+m,w:w*CS-2*m,h:h*CS-2*m};o.ty=t;o.side=side;if(t=='w'||t=='n'||t=='k'){o.cont=1;o.o=false;if(t=='n'){const q=[];for(let i=RI(0,3);i>0;i--){const x=loot(1);if(x)q.push(x)}o.it=q.shift()||null;o.q=q}else o.it=loot(t=='w'?.6:.5)}furn.push(o);walls.push(o);return o};
 const strs=new Set();if(loc=='castle'||(loc=='norm'&&Math.random()<.6)){const cs=rooms.map((r,i)=>i).filter(i=>i!=truckRoom&&i!=quotaRoom&&rooms[i].w>=5&&rooms[i].h>=5&&rooms[i].n==rooms[i].w*rooms[i].h&&!rooms[i].cut.length);cs.sort(()=>Math.random()-.5);if(!cs.length){const al=rooms.map((r,i)=>i).filter(i=>i!=truckRoom&&i!=quotaRoom).sort((a,b)=>rooms[b].n-rooms[a].n);if(al.length)cs.push(al[0])}if(cs.length)strs.add(cs[0]);if(cs.length>1&&Math.random()<.5)strs.add(cs[1])}
 rooms.forEach(assignRoom);rooms.forEach((r,i)=>{r.street=strs.has(i);if(r.street)r.nm=loc=='norm'?'Двір і сад':'Внутрішній двір';if(i==truckRoom||i==quotaRoom)return;const ar=r.w*r.h;if(r.street){const nt=RI(3,6);for(let k=0;k<nt;k++)for(let at=0;at<30;at++)if(place(r,'tr',r.x0+RI(0,r.w-1),r.y0+RI(0,r.h-1),1,1,'free'))break;return}
 if(r.kd=='cor'){for(let a=0;a<3;a++)if(Math.random()<.5)for(let at=0;at<15;at++)if(place(r,'n',r.x0+RI(0,r.w-1),r.y0+RI(0,r.h-1),1,1,'wall'))break;return}
@@ -260,21 +260,29 @@ function reset(){au();up={hp:0,st:0,sp:0,li:0,pw:0};wallet=0;earned=0;slots=[nul
 function start(n){lv=n;showMap=false;if(!NS)loc=net?LOCS[(Math.abs(net.seed|0)+n)%4]:n<2?['norm','castle','museum','lab'][RI(0,3)]:(nextLoc||'norm');bank=bank2=0;d1=d2=0;paused=false;if(mode=='solo'&&n>=2){snap=mkSnap(n);wrSave(snap)}else if(n<2)snap=null;q1=4000+n*2000;q2=Math.round(q1*1.6/500)*500;if(net)seed(net.seed+n*7919);mkmap();pops=[];gcool=0;lost=0;MP.t=0;bul=[];decals=[];foes=[];T=0;fState=0;fT=0;vis={};items=[];
 const cl=[];for(let y=0;y<GH;y++)for(let x=0;x<GW;x++)if(!blk[y][x]&&!res[y][x])cl.push([x,y]);cl.sort(()=>Math.random()-.5);
 {const kk=Math.pow(1.1,n-1),lo=29000*kk,hi=35000*kk,tt=R(lo+600,hi-600);
-const cs=furn.filter(f=>f.cont&&f.it&&f.it.v);let ct=cs.reduce((x,f)=>x+f.it.v,0);while(ct>tt*.3&&cs.length){const f=cs.pop();ct-=f.it.v;f.it=null}
-let hs=0,ci=0;const nh=RI(1,3);
-for(let i=0;i<nh&&ci<cl.length;i++){const cap=Math.floor((tt*.8-ct-hs)/1000)*1000;let v=RI(10,30)*1000;if(v>cap){if(i>0||cap<10000)break;v=cap}const c=cl[ci++];items.push({x:c[0]*CS+CS/2,y:c[1]*CS+CS/2,n:'Величезний предмет',v,k:'hug',c:'#ffd24a',s:8});hs+=v}
-const rem=tt-ct-hs;let cur=0;
-for(let g=0;g<500&&ci<cl.length&&rem-cur>=500;g++){let it=mkItem();if(cur+it.v>rem){const af=TY.filter(t=>t[1]<=rem-cur);if(!af.length)break;const t=af[RI(0,af.length-1)];it={x:0,y:0,n:t[0],v:t[1],k:t[2],c:t[3],s:t[4]}}
-if(it.th){for(let j=ci;j<Math.min(cl.length,ci+120);j++){const rr=rooms[rid[cl[j][1]][cl[j][0]]];if(rr&&rr.kd==it.th){const tm=cl[ci];cl[ci]=cl[j];cl[j]=tm;break}}}it.x=cl[ci][0]*CS+CS/2+R(-8,8);it.y=cl[ci][1]*CS+CS/2+R(-8,8);ci++;items.push(it);cur+=it.v}}
+const cv=f=>(f.it&&f.it.v||0)+(f.q||[]).reduce((a,x)=>a+(x.v||0),0),cs=furn.filter(f=>f.cont&&cv(f)>0);let ct=cs.reduce((x,f)=>x+cv(f),0);while(ct>tt*.3&&cs.length){const f=cs.pop();ct-=cv(f);f.it=null;f.q=[]}
+let hs=0,ci=0;const fcl=i=>{let bj=i,bs=-1;for(let j=i;j<cl.length&&bs<8;j++){const x=cl[j][0],y=cl[j][1];let sc=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const a=x+dx,b=y+dy;if(a>=0&&b>=0&&a<GW&&b<GH&&!blk[b][a])sc++}if(sc>bs){bs=sc;bj=j}}const tm=cl[i];cl[i]=cl[bj];cl[bj]=tm;return cl[i]};const nh=RI(1,3);
+for(let i=0;i<nh&&ci<cl.length;i++){const cap=Math.floor((tt*.8-ct-hs)/1000)*1000;let v=RI(10,30)*1000;if(v>cap){if(i>0||cap<10000)break;v=cap}const c=fcl(ci++);items.push({x:c[0]*CS+CS/2,y:c[1]*CS+CS/2,n:'Величезний предмет',v,k:'hug',c:'#ffd24a',s:8});hs+=v}
+const SL=[];for(const f of furn){const c=cellOf(f.x+f.w/2,f.y+f.h/2),rk=(rooms[rid[c[1]][c[0]]]||{}).kd;
+if(f.ty=='t'){const hz=f.w>=f.h,L=hz?f.w:f.h,k=Math.max(1,Math.floor(L/40));for(let i=0;i<k;i++){const p=L*(i+.5)/k;SL.push({f,rk,x:hz?f.x+p:f.x+f.w/2,y:hz?f.y+f.h/2:f.y+p})}}
+else if(f.cont){const have=(f.it?1:0)+(f.q?f.q.length:0);for(let i=have;i<(f.ty=='n'?3:2);i++)SL.push({f,rk})}}
+SL.sort(()=>Math.random()-.5);const rem=tt-ct-hs;let cur=0;
+for(let g=0;g<500&&rem-cur>=500;g++){let it=mkItem();if(cur+it.v>rem){const af=TY.filter(t=>t[1]<=rem-cur);if(!af.length)break;const t=af[RI(0,af.length-1)];it={x:0,y:0,n:t[0],v:t[1],k:t[2],c:t[3],s:t[4]}}
+if(it.v>=10000){if(ci>=cl.length)break;const c=fcl(ci++);it.x=c[0]*CS+CS/2+R(-6,6);it.y=c[1]*CS+CS/2+R(-6,6);items.push(it);cur+=it.v;continue}
+let jx=0;if(it.th)for(let j=0;j<Math.min(SL.length,40);j++)if(SL[j].rk==it.th){jx=j;break}
+const sl=SL.splice(jx,1)[0];if(!sl)break;
+if(sl.f.ty=='t'){it.x=sl.x;it.y=sl.y;items.push(it)}else{if(!sl.f.it)sl.f.it=it;else(sl.f.q=sl.f.q||[]).push(it)}
+cur+=it.v}}
 unseed();cart={x:TR.x+TR.w+40,y:TR.y+26,it:[]};const ms=40+up.st*10,mh=100+up.hp*25;
 P={x:TR.x+75,y:TR.y+65,hp:mh,mh,st:ms,ms,on:true,c:null,a:0,dir:1,hid:null,eq:slots.findIndex(s=>s=='gun'||s=='ham'),cr:false,hc:false,vx:0,vy:0,hit:0};
 ov('');run=true;rend();say('Раунд '+n+(loc!='norm'?' · '+(LN[loc]||'').toUpperCase():'')+': квота 1 — $'+q1+'. Монстр через 1 хв')}
 function pick(b){b.t=1;b.vx=b.vy=0;P.c=b;items.splice(items.indexOf(b),1);beep(520,.08);say(b.n+' $'+b.v)}
 function busy(D){const cx=D.x+D.w/2,cy=D.y+D.h/2;return[P,...foes,cart].some(o=>Math.hypot(cx-o.x,cy-o.y)<36)}
 function toggleDoor(D){if(D.open){if(busy(D)){say('Двері зайняті');return}D.open=false;beep(150,.1)}else{D.open=true;D.t=15;beep(300,.08)}}
+function adv(f){if(f.q&&f.q.length){f.it=f.q.shift();f.o=false}}
 function openC(f){f.o=true;beep(260,.1);const it=f.it;if(!it){say('Порожньо');return}
-if(it.heal){const s=slots.indexOf(null);if(s>=0){slots[s]=it.heal;f.it=null;rend();say('Знайдено: '+(it.heal=='mini'?'хілка +25':'хілка +50'))}else{say('Слоти повні');f.o=false}return}
-f.it=null;it.t=1;it.x=P.x;it.y=P.y;if(!P.c){P.c=it;say(it.n+' $'+it.v)}else{items.push(it);say('Знайдено: '+it.n+' (на підлозі)')}}
+if(it.heal){const s=slots.indexOf(null);if(s>=0){slots[s]=it.heal;f.it=null;adv(f);rend();say('Знайдено: '+(it.heal=='mini'?'хілка +25':'хілка +50'))}else{say('Слоти повні');f.o=false}return}
+f.it=null;adv(f);it.t=1;it.x=P.x;it.y=P.y;if(!P.c){P.c=it;say(it.n+' $'+it.v)}else{items.push(it);say('Знайдено: '+it.n+' (на підлозі)')}}
 function inFront(x,y){const d=Math.hypot(x-P.x,y-P.y);if(d<18)return true;let a=Math.atan2(y-P.y,x-P.x)-P.a;a=Math.atan2(Math.sin(a),Math.cos(a));return Math.abs(a)<1.05}
 function findCand(){let best=null,bd=1e9;const tc=(x,y,d,l,fn)=>{if(d<l&&d<bd&&inFront(x,y)){bd=d;best=fn}};
 for(const D of doors)tc(D.x+D.w/2,D.y+D.h/2,Math.hypot(D.x+D.w/2-P.x,D.y+D.h/2-P.y),52,()=>toggleDoor(D));
